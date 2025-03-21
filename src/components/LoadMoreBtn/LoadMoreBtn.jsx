@@ -1,11 +1,13 @@
 import css from './LoadMoreBtn.module.css';
 
-export default function LoadMoreBtn({ onClick }) {
+const LoadMoreBtn = React.forwardRef(function LoadMoreBtn({ onClick }, ref) {
   return (
     <div>
-      <button onClick={onClick} className={css.button}>
+      <button ref={ref} onClick={onClick} className={css.button}>
         Load more
       </button>
     </div>
   );
-}
+});
+
+export default LoadMoreBtn;

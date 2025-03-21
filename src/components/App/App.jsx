@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import ImageGallery from '../ImageGallery/ImageGallery';
 import SearchBar from '../SearchBar/SearchBar';
@@ -17,6 +17,10 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
+  const prevImagesLengthRef = useRef(0);
+
+  const loadMoreBtnRef = useRef(null);
+
   const handleSubmit = topic => {
     if (topic === searchTerm) {
       return;
@@ -28,8 +32,20 @@ export default function App() {
   };
 
   const handleLoadMoreClick = () => {
+    prevImagesLengthRef.current = images.length;
     setPage(page + 1);
   };
+
+  useEffect(() => {
+    if (!loading && images.length > prevImagesLengthRef.current && page > 1) {
+      if (loadMoreBtnRef.current) {
+        loadMoreBtnRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }
+  }, [loading, images, page]);
 
   useEffect(() => {
     if (searchTerm === '') {
@@ -73,7 +89,7 @@ export default function App() {
       {images.length > 0 && <ImageGallery items={images} />}
       {loading && <Loader />}
       {images.length > 0 && !loading && page < totalPages && (
-        <LoadMoreBtn onClick={handleLoadMoreClick} />
+        <LoadMoreBtn ref={loadMoreBtnRef} onClick={handleLoadMoreClick} />
       )}
       <Toaster position="top-right" />
     </div>
