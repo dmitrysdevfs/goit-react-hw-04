@@ -10,7 +10,7 @@ export default function SearchBar({ onSubmit }) {
         }}
         onSubmit={(values, actions) => {
           onSubmit(values.topic);
-          actions.resetForm();
+          // actions.resetForm();
         }}
       >
         <Form className={css.form}>
