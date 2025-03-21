@@ -11,5 +11,8 @@ export const fetchImages = async (topic, currentPage) => {
     },
   });
 
-  return response.data.results;
+  return {
+    results: response.data.results,
+    total_pages: response.data.total_pages,
+  };
 };

@@ -13,13 +13,18 @@ export default function App() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [serchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   const handleSubmit = topic => {
+    if (topic === searchTerm) {
+      return;
+    }
     setSearchTerm(topic);
     setPage(1);
     setImages([]);
+    setTotalPages(0);
   };
 
   const handleLoadMoreClick = () => {
@@ -27,7 +32,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (serchTerm === '') {
+    if (searchTerm === '') {
       return;
     }
 
@@ -35,19 +40,31 @@ export default function App() {
       try {
         setError(false);
         setLoading(true);
-        const data = await fetchImages(serchTerm, page);
+
+        const response = await fetchImages(searchTerm, page);
+
+        const { results, total_pages } = response;
+
+        if (!results || results.length === 0) {
+          toast.info('No results found for your search. Try a different term.');
+          setLoading(false);
+          return;
+        }
+
+        setTotalPages(total_pages || 0);
+
         setImages(prevImages => {
-          return [...prevImages, ...data];
+          return page === 1 ? [...results] : [...prevImages, ...results];
         });
       } catch {
         setError(true);
-        toast.error('Please reload there was an error!');
+        toast.error('An error occurred. Please try reloading the page.');
       } finally {
         setLoading(false);
       }
     }
     getData();
-  }, [page, serchTerm]);
+  }, [page, searchTerm]);
 
   return (
     <div className={css.container}>
@@ -55,7 +72,7 @@ export default function App() {
       {error && <ErrorMessage />}
       {images.length > 0 && <ImageGallery items={images} />}
       {loading && <Loader />}
-      {images.length > 0 && !loading && (
+      {images.length > 0 && !loading && page < totalPages && (
         <LoadMoreBtn onClick={handleLoadMoreClick} />
       )}
       <Toaster position="top-right" />
