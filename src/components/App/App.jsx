@@ -8,6 +8,7 @@ import Loader from '../Loader';
 import css from './App.module.css';
 import ErrorMessage from '../ErrorMessage';
 import LoadMoreBtn from '../LoadMoreBtn/LoadMoreBtn';
+import ImageModal from '../ImageModal/ImageModal';
 
 export default function App() {
   const [images, setImages] = useState([]);
@@ -16,6 +17,19 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handleImageClick = image => {
+    setSelectedImage(image);
+    setIsOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpen(false);
+    setSelectedImage(null);
+  };
 
   const prevImagesLengthRef = useRef(0);
 
@@ -86,12 +100,20 @@ export default function App() {
     <div className={css.container}>
       <SearchBar onSubmit={handleSubmit} />
       {error && <ErrorMessage />}
-      {images.length > 0 && <ImageGallery items={images} />}
+      {images.length > 0 && (
+        <ImageGallery items={images} onClick={handleImageClick} />
+      )}
       {loading && <Loader />}
       {images.length > 0 && !loading && page < totalPages && (
         <LoadMoreBtn ref={loadMoreBtnRef} onClick={handleLoadMoreClick} />
       )}
       <Toaster position="top-right" />
+
+      <ImageModal
+        isOpen={isOpen}
+        onRequestClose={handleCloseModal}
+        imageData={selectedImage}
+      />
     </div>
   );
 }
